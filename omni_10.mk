@@ -16,7 +16,7 @@ $(call inherit-product, vendor/twrp/config/common.mk)
 $(call inherit-product, device/kindle/k10/device.mk)
 
 PRODUCT_DEVICE := k10
-PRODUCT_NAME := twrp_k10
+PRODUCT_NAME := omni_10
 PRODUCT_BRAND := kindle
 PRODUCT_MODEL := K10
 PRODUCT_MANUFACTURER := kindle
