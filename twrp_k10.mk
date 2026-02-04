@@ -27,3 +27,15 @@ PRODUCT_BUILD_PROP_OVERRIDES += \
     PRIVATE_BUILD_DESC="full_k10-user 11 RP1A.200720.011 mp1k61v164bspP1 dev-keys"
 
 BUILD_FINGERPRINT := BLU/G90/G0310WW:10/QP1A.190711.020/1585383273:user/release-keys
+
+# Omni TWRP 9 specific configurations
+PRODUCT_PROPERTY_OVERRIDES += \
+    ro.hardware.keystore=mtk \
+    ro.vendor.build.security_patch=2099-12-31 \
+    ro.build.version.security_patch=2099-12-31
+
+# Additional TWRP properties
+PRODUCT_PROPERTY_OVERRIDES += \
+    ro.secure=1 \
+    ro.adb.secure=0 \
+    ro.debuggable=1

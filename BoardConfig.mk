@@ -90,7 +90,7 @@ TW_THEME := portrait_mdpi
 TW_EXTRA_LANGUAGES := false
 TW_SCREEN_BLANK_ON_BOOT := true
 TW_INPUT_BLACKLIST := "hbtp_vm"
-TW_USE_TOOLBOX := false
+TW_USE_TOOLBOX := true
 TW_INCLUDE_REPACKTOOLS := false
 TW_EXCLUDE_SUPERSU := true
 TW_EXCLUDE_TWRPAPP := true
@@ -99,3 +99,26 @@ TW_DEFAULT_LANGUAGE := zh_CN
 TW_EXCLUDE_TZDATA := true
 TW_EXCLUDE_NANO := true
 TW_INCLUDE_INJECTTWRP := false
+
+# Omni TWRP 9 compatibility
+TARGET_RECOVERY_DEVICE_DIRS := $(DEVICE_PATH)
+
+# Encryption support - Required for Android 11+
+TW_INCLUDE_CRYPTO := true
+TW_INCLUDE_CRYPTO_FBE := true
+TW_INCLUDE_FBE_METADATA_DECRYPT := true
+
+# Filesystem support
+TW_INCLUDE_NTFS_3G := true
+TW_INCLUDE_FUSE_EXFAT := true
+
+# Brightness control
+TW_BRIGHTNESS_PATH := "/sys/class/leds/lcd-backlight/brightness"
+TW_MAX_BRIGHTNESS := 255
+TW_DEFAULT_BRIGHTNESS := 128
+
+# Additional TWRP settings
+TW_NO_HAPTICS := false
+TW_DEVICE_VERSION := 1
+TW_Y_OFFSET := 80
+TW_H_OFFSET := -80
