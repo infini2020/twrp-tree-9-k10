@@ -2,7 +2,9 @@
 
 ## 项目概述
 
-这是一个用于 **Kindle K10** 设备（设备代号：`k62v1_64_bsp_S30_254_incell_1036_dianshang`，产品名称：`k10`）的 Android 设备树项目，专门用于构建 **TWRP（Team Win Recovery Project）** 自定义恢复环境。
+这是一个用于 **FATARUS K10** 设备（设备代号：`k62v1_64_bsp_S30_254_incell_1036_dianshang`，产品名称：`k10`）的 Android 设备树项目，专门用于构建 **TWRP（Team Win Recovery Project）** 自定义恢复环境。
+
+该项目经过优化配置，以生成较小的 TWRP 镜像文件，禁用了一些非核心功能以减小体积。
 
 ### 关键技术信息
 
@@ -16,13 +18,17 @@
 - **CPU**: Cortex-A53 (64位) + Cortex-A53 (32位)
 - **内核**: 使用预构建内核
 - **Android 版本**: 基于 Android 11
-- **安全补丁**: 2021-08-01
+- **安全补丁**: 2099-12-31（防止回滚保护）
 - **恢复分区支持**: A/B OTA 更新支持
 - **中文语言支持**: 默认语言设置为简体中文
 
 ### 项目类型
 
 这是一个 **Android 设备树项目**，用于构建 TWRP 自定义恢复镜像。项目采用标准的 Android 构建系统，使用 Makefile 和 Soong 构建系统。
+
+### 优化目标
+
+项目配置专注于减小 TWRP 镜像大小，通过禁用非必要功能（如多语言支持、工具箱、重新打包工具、APEX 预优化等）来优化镜像体积。
 
 ## 项目结构
 
@@ -61,9 +67,9 @@ E:\demo\k10\
 
 ### device.mk
 定义了产品包和 A/B OTA 配置：
-- Boot Control HAL
-- OTA 更新工具
-- 预优化脚本
+- Boot Control HAL（android.hardware.boot@1.0-impl、android.hardware.boot@1.0-service、bootctrl.mt6765 等）
+- OTA 更新工具（已注释掉以减小镜像大小，需要时可启用）
+- 预优化脚本（AB_OTA_POSTINSTALL_CONFIG）
 
 ### twrp_k10.mk
 TWRP 产品定义文件，定义了：
@@ -169,12 +175,15 @@ device/kindle/k10
 ### 设备特定配置
 
 - **屏幕密度**: 260
-- **TWRP 主题**: portrait_hdpi
+- **TWRP 主题**: portrait_mdpi（优化为较小分辨率以减小镜像大小）
 - **输入设备黑名单**: hbtp_vm
-- **支持的语言**: TW_EXTRA_LANGUAGES = true
+- **支持的语言**: TW_EXTRA_LANGUAGES = false（禁用以减小镜像大小）
 - **默认语言**: zh_CN（简体中文）
-- **包含工具**: TW_USE_TOOLBOX = true
-- **包含重新打包工具**: TW_INCLUDE_REPACKTOOLS = true
+- **包含工具**: TW_USE_TOOLBOX = false（禁用以减小镜像大小）
+- **包含重新打包工具**: TW_INCLUDE_REPACKTOOLS = false（禁用以减小镜像大小）
+- **排除 SU**: TW_EXCLUDE_SUPERSU = true（排除以减小镜像大小）
+- **排除 TWRP 应用**: TW_EXCLUDE_TWRPAPP = true（排除以减小镜像大小）
+- **启动时屏幕熄灭**: TW_SCREEN_BLANK_ON_BOOT = true
 
 ### 常见修改场景
 
@@ -182,8 +191,26 @@ device/kindle/k10
 2. **更新内核**: 替换 `prebuilt/kernel` 文件
 3. **添加 TWRP 功能**: 修改 `BoardConfig.mk` 中的 `TW_*` 配置
 4. **修复分区挂载**: 编辑 `recovery.fstab`
+5. **启用多语言支持**: 将 `TW_EXTRA_LANGUAGES` 改为 `true`
+6. **启用工具箱**: 将 `TW_USE_TOOLBOX` 改为 `true`
+7. **启用重新打包工具**: 将 `TW_INCLUDE_REPACKTOOLS` 改为 `true`
+8. **启用 OTA 功能**: 在 `device.mk` 中取消注释 OTA 相关包
+9. **启用 APEX 预优化**: 将 `DEXPREOPT_GENERATE_APEX_IMAGE` 改为 `true`
 
 ## 注意事项
+
+### 镜像大小优化
+
+项目经过专门优化以减小 TWRP 镜像大小，包括：
+- 禁用 APEX 镜像预优化（`DEXPREOPT_GENERATE_APEX_IMAGE := false`）
+- 禁用多语言支持（`TW_EXTRA_LANGUAGES := false`，仅保留默认中文）
+- 禁用工具箱（`TW_USE_TOOLBOX := false`）
+- 禁用重新打包工具（`TW_INCLUDE_REPACKTOOLS := false`）
+- 排除 SuperSU（`TW_EXCLUDE_SUPERSU := true`）
+- 排除 TWRP 应用（`TW_EXCLUDE_TWRPAPP := true`）
+- 使用较小的主题分辨率（`TW_THEME := portrait_mdpi`）
+
+这些优化措施显著减小了最终 TWRP 镜像的体积，使其更适合设备限制。如果需要这些功能，可以修改 `BoardConfig.mk` 和 `device.mk` 中的相应配置。
 
 ### 硬编码值警告
 
@@ -195,10 +222,10 @@ device/kindle/k10
 
 ### APEX 配置
 
-项目启用了 APEX 镜像预优化：
-- `DEXPREOPT_GENERATE_APEX_IMAGE := true`
+项目禁用了 APEX 镜像预优化以减小镜像大小：
+- `DEXPREOPT_GENERATE_APEX_IMAGE := false`
 
-这允许在构建时预生成 APEX 镜像，提高恢复性能。
+这是为了减小 TWRP 镜像体积而做出的优化。
 
 ### 安全和回滚保护
 
@@ -224,6 +251,17 @@ device/kindle/k10
 - 支持自动 USB 设备检测（外部设备和 MT_USB 平台）
 - 默认启动 adbd 以支持 ADB 调试
 
+### OTA 功能
+
+默认情况下，OTA 功能相关的工具包已在 `device.mk` 中注释掉，以减小镜像大小。如需启用 OTA 更新功能，请编辑 `device.mk` 文件，取消注释以下包：
+- otapreopt_script
+- cppreopts.sh
+- update_engine
+- update_verifier
+- update_engine_sideload
+
+取消注释后，TWRP 将支持完整的 OTA 更新功能，但会增加镜像体积。
+
 ## 依赖项
 
 ### 内部依赖
@@ -231,8 +269,16 @@ device/kindle/k10
 - 预构建内核: `prebuilt/kernel`
 - TWRP 公共配置: `vendor/twrp/config/common.mk`
 - extract-utils: `tools/extract-utils/extract_utils.sh`
-- Boot Control HAL: bootctrl.mt6765
-- OTA 工具: otapreopt_script, cppreopts.sh, update_engine, update_verifier, update_engine_sideload
+- Boot Control HAL: android.hardware.boot@1.0-impl, android.hardware.boot@1.0-service, bootctrl.mt6765, libgptutils, libz, libcutils
+
+### 注释掉的依赖（用于减小镜像大小）
+
+以下 OTA 工具包已在 `device.mk` 中注释掉，以减小镜像大小。如需 OTA 功能，请取消注释：
+- otapreopt_script
+- cppreopts.sh
+- update_engine
+- update_verifier
+- update_engine_sideload
 
 ### 外部依赖
 
@@ -270,4 +316,4 @@ device/kindle/k10
 ---
 
 **最后更新**: 2026年2月4日
-**文档版本**: 2.0
+**文档版本**: 3.0
